@@ -1,0 +1,6 @@
+{
+  "name": "BLACK USA 3D",
+  "version": "0.1",
+  "entry": "index.html",
+  "engine": "Three.js 0.128.0"
+}

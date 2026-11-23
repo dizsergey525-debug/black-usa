@@ -1,62 +1,751 @@
-<!doctype html>
-<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><title>BLACK USA 3D</title>
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>BLACK USA 3D</title>
+
 <style>
-*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#111;font-family:Arial;touch-action:none}#game{position:fixed;inset:0}canvas{display:block}
-#hud{position:fixed;inset:0;color:white;pointer-events:none;text-shadow:0 2px 4px #000}#top{display:flex;justify-content:space-between;padding:12px}.box{background:#07131ddd;border:1px solid #ffffff33;border-radius:12px;padding:9px 12px}#brand{color:#6bd5ff;font-weight:900}#stats{text-align:right;font-size:13px;line-height:1.5}#hint{position:absolute;top:78px;left:50%;transform:translateX(-50%);white-space:nowrap;background:#0008;padding:7px 10px;border-radius:8px;font-size:12px}
-#controls{position:absolute;bottom:18px;left:18px;right:18px;display:flex;justify-content:space-between;align-items:end}#stick{width:120px;height:120px;border-radius:50%;background:#ffffff22;border:2px solid #ffffff77;pointer-events:auto;position:relative}#knob{position:absolute;left:34px;top:34px;width:48px;height:48px;border-radius:50%;background:#d9f4ffbb;border:2px solid white}
-#buttons{display:flex;gap:8px;pointer-events:auto}.act{width:64px;height:64px;border-radius:50%;background:#071b2be8;color:white;border:2px solid #ffffffaa;font-weight:bold;font-size:11px}
-#toast{position:absolute;bottom:150px;left:50%;transform:translateX(-50%);background:#06131ddd;padding:9px 13px;border-radius:10px;opacity:0}
-#start{position:fixed;inset:0;background:#06111bee;display:grid;place-items:center;color:white;text-align:center;padding:22px}#card{max-width:380px;background:#0b1c29;border:1px solid #4ebbe766;border-radius:18px;padding:25px}h1{color:#6bd5ff;margin:0}p{color:#c6d6df;line-height:1.5;font-size:14px}#play{background:#159bd2;color:white;border:0;border-radius:12px;padding:14px 28px;font-weight:bold;font-size:16px}
-</style></head><body><div id="game"></div>
-<div id="hud"><div id="top"><div class="box"><div id="brand">BLACK USA 3D</div><small>CITY PROTOTYPE</small></div><div class="box" id="stats">💵 $1 000<br>Уровень: 1<br>❤️ 100 HP</div></div><div id="hint">Исследуй город • Найди зелёную метку</div>
-<div id="controls"><div id="stick"><div id="knob"></div></div><div id="buttons"><button class="act" id="run">БЕГ</button><button class="act" id="jump">ПРЫЖОК</button><button class="act" id="do">ДЕЙСТВИЕ</button></div></div><div id="toast"></div></div>
-<div id="start"><div id="card"><h1>BLACK USA 3D</h1><p>Новый трёхмерный прототип: город, персонаж от третьего лица, машины и простое задание.</p><p>Телефон: джойстик и кнопки. ПК: WASD, Shift и мышь.</p><button id="play">НАЧАТЬ ИГРУ</button></div></div>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    background: #080b10;
+    color: white;
+    font-family: Arial, sans-serif;
+    overflow: hidden;
+    user-select: none;
+}
+
+#game {
+    position: fixed;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+}
+
+#hud {
+    position: fixed;
+    top: 15px;
+    left: 15px;
+    z-index: 10;
+}
+
+.logo {
+    font-size: 25px;
+    font-weight: 900;
+    letter-spacing: 3px;
+    color: #ff3030;
+    text-shadow: 0 0 15px #ff000080;
+}
+
+.stats {
+    margin-top: 10px;
+    background: rgba(0,0,0,.65);
+    padding: 12px;
+    border-radius: 12px;
+    border-left: 3px solid #ff3030;
+    width: 180px;
+}
+
+.stat {
+    margin: 5px 0;
+    font-size: 14px;
+}
+
+.money {
+    color: #39ff91;
+    font-weight: bold;
+}
+
+#healthContainer {
+    width: 150px;
+    height: 9px;
+    background: #333;
+    border-radius: 10px;
+    margin-top: 5px;
+    overflow: hidden;
+}
+
+#health {
+    width: 100%;
+    height: 100%;
+    background: #ff3030;
+    transition: width .3s;
+}
+
+#map {
+    position: fixed;
+    top: 15px;
+    right: 15px;
+    width: 125px;
+    height: 125px;
+    background: rgba(5,10,15,.85);
+    border: 2px solid #ff3030;
+    border-radius: 12px;
+    z-index: 10;
+}
+
+#mapPlayer {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background: white;
+    border-radius: 50%;
+    top: 50%;
+    left: 50%;
+    box-shadow: 0 0 10px white;
+}
+
+#controls {
+    position: fixed;
+    bottom: 25px;
+    left: 25px;
+    z-index: 20;
+}
+
+.joystick {
+    width: 125px;
+    height: 125px;
+    border-radius: 50%;
+    background: rgba(255,255,255,.1);
+    border: 2px solid rgba(255,255,255,.25);
+    position: relative;
+    touch-action: none;
+}
+
+#stick {
+    position: absolute;
+    width: 55px;
+    height: 55px;
+    border-radius: 50%;
+    background: rgba(255,50,50,.8);
+    border: 2px solid white;
+    left: 33px;
+    top: 33px;
+}
+
+#buttons {
+    position: fixed;
+    right: 25px;
+    bottom: 30px;
+    z-index: 20;
+    display: flex;
+    gap: 12px;
+    align-items: flex-end;
+}
+
+.gameButton {
+    width: 65px;
+    height: 65px;
+    border-radius: 50%;
+    background: rgba(255,40,40,.7);
+    border: 2px solid white;
+    color: white;
+    font-size: 14px;
+    font-weight: bold;
+    touch-action: none;
+}
+
+.gameButton:active {
+    background: red;
+    transform: scale(.9);
+}
+
+#message {
+    position: fixed;
+    bottom: 180px;
+    width: 100%;
+    text-align: center;
+    font-size: 16px;
+    color: white;
+    z-index: 30;
+    text-shadow: 0 2px 5px black;
+    pointer-events: none;
+}
+
+#loading {
+    position: fixed;
+    inset: 0;
+    background: #080b10;
+    z-index: 100;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+
+.loadingLogo {
+    font-size: 35px;
+    font-weight: 900;
+    color: #ff3030;
+    letter-spacing: 5px;
+}
+
+.loadingBar {
+    width: 220px;
+    height: 8px;
+    background: #222;
+    margin-top: 25px;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+#loadingProgress {
+    width: 0%;
+    height: 100%;
+    background: #ff3030;
+}
+
+#loadingText {
+    margin-top: 12px;
+    color: #888;
+    font-size: 12px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div id="loading">
+    <div class="loadingLogo">BLACK USA</div>
+    <div class="loadingBar">
+        <div id="loadingProgress"></div>
+    </div>
+    <div id="loadingText">ЗАГРУЗКА ГОРОДА...</div>
+</div>
+
+<div id="game"></div>
+
+<div id="hud">
+    <div class="logo">BLACK USA</div>
+
+    <div class="stats">
+        <div class="stat">Игрок: <b>Коулен</b></div>
+        <div class="stat">Уровень: <b id="level">1</b></div>
+        <div class="stat">Деньги: <span class="money" id="money">1 000 $</span></div>
+        <div class="stat">HP: <b id="hpText">100</b></div>
+
+        <div id="healthContainer">
+            <div id="health"></div>
+        </div>
+    </div>
+</div>
+
+<div id="map">
+    <div id="mapPlayer"></div>
+</div>
+
+<div id="controls">
+    <div class="joystick" id="joystick">
+        <div id="stick"></div>
+    </div>
+</div>
+
+<div id="buttons">
+    <button class="gameButton" id="jump">ПРЫЖОК</button>
+    <button class="gameButton" id="run">БЕГ</button>
+</div>
+
+<div id="message"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
 <script>
-(()=>{'use strict';
-const scene=new THREE.Scene();scene.background=new THREE.Color(0x91b9d0);scene.fog=new THREE.Fog(0x91b9d0,75,260);
-const camera=new THREE.PerspectiveCamera(65,innerWidth/innerHeight,.1,600);
-const renderer=new THREE.WebGLRenderer({antialias:true});renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));renderer.setSize(innerWidth,innerHeight);renderer.shadowMap.enabled=true;document.querySelector('#game').appendChild(renderer.domElement);
-scene.add(new THREE.HemisphereLight(0xd9efff,0x526044,1.1));const sun=new THREE.DirectionalLight(0xfff0d2,1.1);sun.position.set(-70,110,55);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);scene.add(sun);
-const material=c=>new THREE.MeshStandardMaterial({color:c,roughness:.9});
-function box(w,h,d,m,x,y,z){let o=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),m);o.position.set(x,y,z);o.castShadow=true;o.receiveShadow=true;scene.add(o);return o}
-let ground=new THREE.Mesh(new THREE.PlaneGeometry(420,420),material(0x47734b));ground.rotation.x=-Math.PI/2;ground.receiveShadow=true;scene.add(ground);
-const road=material(0x30363b),stripe=material(0xe8d58a);
-function makeRoad(x,z,w,d){box(w,.12,d,road,x,.06,z);if(w>d){for(let a=-w/2+5;a<w/2;a+=12)box(5,.025,.18,stripe,x+a,.13,z)}else{for(let a=-d/2+5;a<d/2;a+=12)box(.18,.025,5,stripe,x,.13,z+a)}}
-makeRoad(0,0,420,18);makeRoad(0,0,18,420);[-95,95].forEach(v=>{makeRoad(0,v,420,14);makeRoad(v,0,14,420)});
-const buildings=[];const colors=[0x9b9b9b,0xb5a28d,0x777f89,0xc0b7a7,0x8d9b9e,0x927e72];
-for(let x=-180;x<=180;x+=30)for(let z=-180;z<=180;z+=30){if(Math.abs(x)<20||Math.abs(z)<20||Math.abs(x-95)<16||Math.abs(z-95)<16||Math.abs(x+95)<16||Math.abs(z+95)<16)continue;
-let w=13+Math.abs((x*7+z*3)%7),d=13+Math.abs((z*5+x)%7),h=10+Math.abs((x*13+z*9)%34);box(w,h,d,material(colors[Math.abs(Math.floor(x+z))%colors.length]),x,h/2,z);buildings.push({x,z,w,d});
-let win=material(0x8ec4d8);for(let y=3;y<h-2;y+=4)for(let xx=-w/2+2;xx<w/2-1;xx+=4)box(.9,1.5,.12,win,x+xx,y,z+d/2+.08)}
-for(let x=-175;x<=175;x+=35)for(let z=-175;z<=175;z+=35){if(Math.abs(x)<25||Math.abs(z)<25||Math.floor((x+z)/35)%3)continue;let t=new THREE.Mesh(new THREE.CylinderGeometry(.45,.6,3,7),material(0x68462b));t.position.set(x,1.5,z);scene.add(t);let c=new THREE.Mesh(new THREE.SphereGeometry(2.4,8,7),material(0x28613b));c.position.set(x,4,z);scene.add(c)}
-const player=new THREE.Group();scene.add(player);const shirt=material(0x176b9b),pants=material(0x242c39),skin=material(0xd6a47c);
-function part(g,geo,m,x,y,z){let o=new THREE.Mesh(geo,m);o.position.set(x,y,z);o.castShadow=true;g.add(o);return o}
-part(player,new THREE.BoxGeometry(1.15,1.55,.62),shirt,0,2.15,0);part(player,new THREE.SphereGeometry(.43,12,10),skin,0,3.25,0);
-let legs=[];for(let x of [-.32,.32])legs.push(part(player,new THREE.BoxGeometry(.38,1.1,.45),pants,x,.85,0));
-for(let x of [-.78,.78])part(player,new THREE.BoxGeometry(.3,1.2,.35),shirt,x,2.1,0);
-player.position.set(0,0,8);
-const marker=new THREE.Group();marker.position.set(35,0,-35);scene.add(marker);let ring=new THREE.Mesh(new THREE.TorusGeometry(2.2,.22,8,24),new THREE.MeshBasicMaterial({color:0x39ff88}));ring.rotation.x=Math.PI/2;ring.position.y=.25;marker.add(ring);let beam=new THREE.Mesh(new THREE.CylinderGeometry(.12,.12,7,8),new THREE.MeshBasicMaterial({color:0x39ff88,transparent:true,opacity:.25}));beam.position.y=4;marker.add(beam);
-const cars=[];[0xc52f32,0x236fc2,0xd9d9d9,0x252525,0xd6a82f].forEach((c,i)=>{let g=new THREE.Group();part(g,new THREE.BoxGeometry(3.2,1.1,5.3),material(c),0,.8,0);part(g,new THREE.BoxGeometry(2.35,.9,2.5),material(0x8db5c5),0,1.65,-.25);g.position.set(-190+i*45,.05,i%2?5:-5);scene.add(g);cars.push(g)});
-let started=false,running=false,mx=0,my=0,angle=0,pitch=.22,walk=0,money=1000,level=1,toastTime=0;
-const toast=document.querySelector('#toast'),stats=document.querySelector('#stats');function say(s){toast.textContent=s;toast.style.opacity=1;toastTime=2}function refresh(){stats.innerHTML='💵 $'+money.toLocaleString('ru-RU')+'<br>Уровень: '+level+'<br>❤️ 100 HP'}
-document.querySelector('#play').onclick=()=>{started=true;document.querySelector('#start').style.display='none';say('Добро пожаловать в город!')};
-document.querySelector('#run').onpointerdown=()=>running=true;['pointerup','pointercancel','pointerleave'].forEach(e=>document.querySelector('#run').addEventListener(e,()=>running=false));
-document.querySelector('#jump').onclick=()=>{if(player.position.y<.05)player.userData.vy=7};
-document.querySelector('#do').onclick=()=>{if(player.position.distanceTo(marker.position)<8){money+=500;level++;refresh();marker.position.set((Math.random()-.5)*140,0,(Math.random()-.5)*140);say('Задание выполнено! +$500')}else say('Подойди к зелёной метке')};
-const stick=document.querySelector('#stick'),knob=document.querySelector('#knob');let sid=null;
-function stickMove(e){let r=stick.getBoundingClientRect(),dx=e.clientX-r.left-r.width/2,dy=e.clientY-r.top-r.height/2,l=Math.hypot(dx,dy),m=42;if(l>m){dx=dx/l*m;dy=dy/l*m}mx=dx/m;my=dy/m;knob.style.transform=`translate(${dx}px,${dy}px)`}
-stick.onpointerdown=e=>{sid=e.pointerId;stick.setPointerCapture(sid);stickMove(e)};stick.onpointermove=e=>{if(e.pointerId===sid)stickMove(e)};function release(){sid=null;mx=my=0;knob.style.transform='translate(0,0)'}stick.onpointerup=release;stick.onpointercancel=release;
-let keys={};addEventListener('keydown',e=>{keys[e.key.toLowerCase()]=true;if(e.key==='Shift')running=true});addEventListener('keyup',e=>{keys[e.key.toLowerCase()]=false;if(e.key==='Shift')running=false});
-let drag=false,lx=0,ly=0;renderer.domElement.onpointerdown=e=>{if(e.pointerType==='mouse'){drag=true;lx=e.clientX;ly=e.clientY}};addEventListener('pointerup',()=>drag=false);addEventListener('pointermove',e=>{if(drag){angle-=(e.clientX-lx)*.005;pitch=Math.max(-.05,Math.min(.65,pitch+(e.clientY-ly)*.003));lx=e.clientX;ly=e.clientY}});
-function blocked(x,z){return buildings.some(b=>Math.abs(x-b.x)<b.w/2+1&&Math.abs(z-b.z)<b.d/2+1)}
-const clock=new THREE.Clock();function animate(){requestAnimationFrame(animate);let dt=Math.min(clock.getDelta(),.04);
-if(started){let ix=mx,iz=my;if(keys.w||keys.arrowup)iz=-1;if(keys.s||keys.arrowdown)iz=1;if(keys.a||keys.arrowleft)ix=-1;if(keys.d||keys.arrowright)ix=1;let mag=Math.hypot(ix,iz);if(mag>1){ix/=mag;iz/=mag}let speed=running?15:8,fx=-Math.sin(angle),fz=-Math.cos(angle),rx=Math.cos(angle),rz=-Math.sin(angle),dx=(rx*ix+fx*(-iz))*speed*dt,dz=(rz*ix+fz*(-iz))*speed*dt,nx=player.position.x+dx,nz=player.position.z+dz;
-if(!blocked(nx,player.position.z))player.position.x=THREE.MathUtils.clamp(nx,-205,205);if(!blocked(player.position.x,nz))player.position.z=THREE.MathUtils.clamp(nz,-205,205);
-if(mag>.1){player.rotation.y=Math.atan2(dx,dz);walk+=dt*(running?13:8);legs[0].rotation.x=Math.sin(walk)*.55;legs[1].rotation.x=-Math.sin(walk)*.55}
-player.userData.vy=(player.userData.vy||0)-18*dt;player.position.y+=player.userData.vy*dt;if(player.position.y<0){player.position.y=0;player.userData.vy=0}
-cars.forEach((c,i)=>{c.position.x+=(i%2?-1:1)*(5+i%3)*dt;if(c.position.x>210)c.position.x=-210;if(c.position.x< -210)c.position.x=210});
-marker.rotation.y+=dt;let target=new THREE.Vector3(player.position.x,2.3,player.position.z),offset=new THREE.Vector3(Math.sin(angle)*13,5+pitch*9,Math.cos(angle)*13);camera.position.lerp(target.clone().add(offset),1-Math.pow(.001,dt));camera.lookAt(target);if(toastTime>0){toastTime-=dt;if(toastTime<=0)toast.style.opacity=0}}
-renderer.render(scene,camera)}
-animate();addEventListener('resize',()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)});refresh();
-})();
-</script></body></html>
+/* ===============================
+   BLACK USA 3D
+   GAME ENGINE
+================================ */
+
+const GAME = {
+    name: "BLACK USA",
+    version: "0.1",
+    player: {
+        name: "Коулен",
+        level: 1,
+        money: 1000,
+        hp: 100,
+        maxHp: 100
+    },
+    world: {
+        size: 3000,
+        buildings: 100,
+        roads: 8
+    }
+};
+
+/* ===============================
+   THREE.JS
+================================ */
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(0x87a9c4);
+scene.fog = new THREE.Fog(0x87a9c4, 100, 1200);
+
+const camera = new THREE.PerspectiveCamera(
+    70,
+    window.innerWidth / window.innerHeight,
+    0.1,
+    3000
+);
+
+const renderer = new THREE.WebGLRenderer({
+    antialias: true,
+    powerPreference: "high-performance"
+});
+
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+renderer.shadowMap.enabled = false;
+
+document.getElementById("game").appendChild(renderer.domElement);
+
+/* ===============================
+   LIGHT
+================================ */
+
+const ambient = new THREE.AmbientLight(0xffffff, 0.7);
+scene.add(ambient);
+
+const sunlight = new THREE.DirectionalLight(0xffffff, 1);
+sunlight.position.set(300, 500, 200);
+scene.add(sunlight);
+
+/* ===============================
+   GROUND
+================================ */
+
+const groundGeometry = new THREE.PlaneGeometry(3000, 3000);
+const groundMaterial = new THREE.MeshLambertMaterial({
+    color: 0x4c7051
+});
+
+const ground = new THREE.Mesh(groundGeometry, groundMaterial);
+ground.rotation.x = -Math.PI / 2;
+ground.position.y = -0.1;
+scene.add(ground);
+
+/* ===============================
+   ROADS
+================================ */
+
+function createRoad(x, z, width, length, rotation = 0) {
+    const geometry = new THREE.BoxGeometry(width, 0.1, length);
+
+    const material = new THREE.MeshLambertMaterial({
+        color: 0x25282c
+    });
+
+    const road = new THREE.Mesh(geometry, material);
+    road.position.set(x, 0.01, z);
+    road.rotation.y = rotation;
+    scene.add(road);
+
+    // Разметка
+    for (let i = -length / 2; i < length / 2; i += 30) {
+        const line = new THREE.Mesh(
+            new THREE.BoxGeometry(0.5, 0.12, 10),
+            new THREE.MeshBasicMaterial({ color: 0xffffff })
+        );
+
+        line.position.set(x, 0.08, z + i);
+        scene.add(line);
+    }
+}
+
+// Главные дороги
+createRoad(0, 0, 24, 3000);
+createRoad(200, 0, 18, 3000);
+createRoad(-200, 0, 18, 3000);
+createRoad(0, 200, 3000, 18, Math.PI / 2);
+createRoad(0, -200, 3000, 18, Math.PI / 2);
+
+/* ===============================
+   BUILDINGS
+================================ */
+
+const buildingColors = [
+    0x777777,
+    0x888899,
+    0x555566,
+    0x997766,
+    0x666677,
+    0x444455,
+    0x999999
+];
+
+function createBuilding(x, z) {
+    const width = 30 + Math.random() * 30;
+    const depth = 30 + Math.random() * 30;
+    const height = 30 + Math.random() * 180;
+
+    const geometry = new THREE.BoxGeometry(width, height, depth);
+
+    const material = new THREE.MeshLambertMaterial({
+        color: buildingColors[
+            Math.floor(Math.random() * buildingColors.length)
+        ]
+    });
+
+    const building = new THREE.Mesh(geometry, material);
+
+    building.position.set(x, height / 2, z);
+    scene.add(building);
+
+    // Крыша
+    const roof = new THREE.Mesh(
+        new THREE.BoxGeometry(width + 1, 2, depth + 1),
+        new THREE.MeshLambertMaterial({ color: 0x333333 })
+    );
+
+    roof.position.set(x, height + 1, z);
+    scene.add(roof);
+}
+
+for (let i = 0; i < 100; i++) {
+    const x = (Math.random() - 0.5) * 2500;
+    const z = (Math.random() - 0.5) * 2500;
+
+    // Не ставим дома прямо на главные дороги
+    if (Math.abs(x) < 40 || Math.abs(z) < 40) continue;
+
+    createBuilding(x, z);
+}
+
+/* ===============================
+   PLAYER
+================================ */
+
+const player = new THREE.Group();
+
+const body = new THREE.Mesh(
+    new THREE.BoxGeometry(1, 2, 1),
+    new THREE.MeshLambertMaterial({ color: 0x2255ff })
+);
+
+body.position.y = 1;
+player.add(body);
+
+const head = new THREE.Mesh(
+    new THREE.BoxGeometry(0.7, 0.7, 0.7),
+    new THREE.MeshLambertMaterial({ color: 0xffcc99 })
+);
+
+head.position.y = 2.35;
+player.add(head);
+
+scene.add(player);
+player.position.set(0, 0, 0);
+
+/* ===============================
+   MOVEMENT
+================================ */
+
+let moveX = 0;
+let moveZ = 0;
+let speed = 0.8;
+let isRunning = false;
+let velocityY = 0;
+let isJumping = false;
+
+const gravity = 0.025;
+
+function movePlayer() {
+    player.position.x += moveX * speed;
+    player.position.z += moveZ * speed;
+
+    if (moveX !== 0 || moveZ !== 0) {
+        player.rotation.y = Math.atan2(moveX, moveZ);
+    }
+
+    // Прыжок
+    player.position.y += velocityY;
+
+    if (isJumping) {
+        velocityY -= gravity;
+    }
+
+    if (player.position.y <= 0) {
+        player.position.y = 0;
+        velocityY = 0;
+        isJumping = false;
+    }
+}
+
+/* ===============================
+   JOYSTICK
+================================ */
+
+const joystick = document.getElementById("joystick");
+const stick = document.getElementById("stick");
+
+let joystickActive = false;
+let joystickCenterX = 0;
+let joystickCenterY = 0;
+
+joystick.addEventListener("touchstart", function(e) {
+    e.preventDefault();
+
+    joystickActive = true;
+
+    const rect = joystick.getBoundingClientRect();
+
+    joystickCenterX = rect.left + rect.width / 2;
+    joystickCenterY = rect.top + rect.height / 2;
+
+    joystickMove(e.touches[0]);
+}, { passive: false });
+
+joystick.addEventListener("touchmove", function(e) {
+    e.preventDefault();
+
+    if (!joystickActive) return;
+
+    joystickMove(e.touches[0]);
+}, { passive: false });
+
+window.addEventListener("touchend", function() {
+    joystickActive = false;
+    moveX = 0;
+    moveZ = 0;
+
+    stick.style.left = "33px";
+    stick.style.top = "33px";
+});
+
+function joystickMove(touch) {
+    const dx = touch.clientX - joystickCenterX;
+    const dy = touch.clientY - joystickCenterY;
+
+    const maxDistance = 35;
+
+    const distance = Math.sqrt(dx * dx + dy * dy);
+    const angle = Math.atan2(dy, dx);
+
+    const limitedDistance = Math.min(distance, maxDistance);
+
+    const px = Math.cos(angle) * limitedDistance;
+    const py = Math.sin(angle) * limitedDistance;
+
+    stick.style.left = (33 + px) + "px";
+    stick.style.top = (33 + py) + "px";
+
+    moveX = dx / maxDistance;
+    moveZ = dy / maxDistance;
+
+    const magnitude = Math.sqrt(moveX * moveX + moveZ * moveZ);
+
+    if (magnitude > 1) {
+        moveX /= magnitude;
+        moveZ /= magnitude;
+    }
+}
+
+/* ===============================
+   RUN BUTTON
+================================ */
+
+const runButton = document.getElementById("run");
+
+runButton.addEventListener("touchstart", function(e) {
+    e.preventDefault();
+    isRunning = true;
+    speed = 1.5;
+});
+
+runButton.addEventListener("touchend", function() {
+    isRunning = false;
+    speed = 0.8;
+});
+
+runButton.addEventListener("mousedown", function() {
+    isRunning = true;
+    speed = 1.5;
+});
+
+runButton.addEventListener("mouseup", function() {
+    isRunning = false;
+    speed = 0.8;
+});
+
+/* ===============================
+   JUMP
+================================ */
+
+const jumpButton = document.getElementById("jump");
+
+function jump() {
+    if (!isJumping) {
+        isJumping = true;
+        velocityY = 0.45;
+    }
+}
+
+jumpButton.addEventListener("touchstart", function(e) {
+    e.preventDefault();
+    jump();
+});
+
+jumpButton.addEventListener("click", jump);
+
+/* ===============================
+   CAMERA
+================================ */
+
+function updateCamera() {
+    const distance = 12;
+    const height = 7;
+
+    const targetX = player.position.x;
+    const targetZ = player.position.z;
+
+    const behindX = Math.sin(player.rotation.y) * distance;
+    const behindZ = Math.cos(player.rotation.y) * distance;
+
+    camera.position.x = targetX - behindX;
+    camera.position.y = player.position.y + height;
+    camera.position.z = targetZ - behindZ;
+
+    camera.lookAt(
+        player.position.x,
+        player.position.y + 1,
+        player.position.z
+    );
+}
+
+/* ===============================
+   HUD UPDATE
+================================ */
+
+function updateHUD() {
+    document.getElementById("level").textContent =
+        GAME.player.level;
+
+    document.getElementById("money").textContent =
+        GAME.player.money.toLocaleString("ru-RU") + " $";
+
+    document.getElementById("hpText").textContent =
+        GAME.player.hp;
+
+    document.getElementById("health").style.width =
+        (GAME.player.hp / GAME.player.maxHp * 100) + "%";
+}
+
+/* ===============================
+   MESSAGE
+================================ */
+
+function showMessage(text) {
+    const message = document.getElementById("message");
+
+    message.textContent = text;
+
+    setTimeout(() => {
+        message.textContent = "";
+    }, 2500);
+}
+
+/* ===============================
+   MAP
+================================ */
+
+function updateMap() {
+    const mapPlayer = document.getElementById("mapPlayer");
+
+    const mapX = player.position.x / 3000 * 100;
+    const mapZ = player.position.z / 3000 * 100;
+
+    mapPlayer.style.left = (50 + mapX) + "%";
+    mapPlayer.style.top = (50 + mapZ) + "%";
+}
+
+/* ===============================
+   LOADING
+================================ */
+
+let loadingValue = 0;
+
+const loadingInterval = setInterval(() => {
+    loadingValue += Math.random() * 12;
+
+    if (loadingValue >= 100) {
+        loadingValue = 100;
+
+        clearInterval(loadingInterval);
+
+        document.getElementById("loadingText").textContent =
+            "ГОТОВО";
+
+        setTimeout(() => {
+            document.getElementById("loading").style.display = "none";
+            showMessage("Добро пожаловать в BLACK USA!");
+        }, 500);
+    }
+
+    document.getElementById("loadingProgress").style.width =
+        loadingValue + "%";
+}, 150);
+
+/* ===============================
+   GAME LOOP
+================================ */
+
+function animate() {
+    requestAnimationFrame(animate);
+
+    movePlayer();
+    updateCamera();
+    updateHUD();
+    updateMap();
+
+    renderer.render(scene, camera);
+}
+
+animate();
+
+/* ===============================
+   RESIZE
+================================ */
+
+window.addEventListener("resize", function() {
+    camera.aspect = window.innerWidth / window.innerHeight;
+    camera.updateProjectionMatrix();
+
+    renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+/* ===============================
+   KEYBOARD
+================================ */
+
+window.addEventListener("keydown", function(e) {
+    if (e.key === "w" || e.key === "ArrowUp") moveZ = -1;
+    if (e.key === "s" || e.key === "ArrowDown") moveZ = 1;
+    if (e.key === "a" || e.key === "ArrowLeft") moveX = -1;
+    if (e.key === "d" || e.key === "ArrowRight") moveX = 1;
+
+    if (e.key === " ") jump();
+});
+
+window.addEventListener("keyup", function(e) {
+    moveX = 0;
+    moveZ = 0;
+});
+
+/* ===============================
+   START
+================================ */
+
+console.log("BLACK USA 3D ENGINE STARTED");
+console.log("Version:", GAME.version);
+console.log("Player:", GAME.player.name);
+console.log("World:", GAME.world.size);
+
+</script>
+
+</body>
+</html>
